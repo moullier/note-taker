@@ -59,9 +59,13 @@ app.post("/api/notes", function(req, res) {
 
         for(let i = 0; i < notes.length; i++) {
             let note1 = notes[i];
-            console.log(note1);
-
+            console.log(note1.id);
+            if(note1.id > uniqueID) {
+                uniqueID = note1.id + 1;
+            }
         }
+
+
 
         console.log("notes prior to adding new note: ");
         console.log(notes);
@@ -81,18 +85,46 @@ app.post("/api/notes", function(req, res) {
             console.log("Success!");
           
           });
-          
-
-
-
-
     });
-
-
-
-  
     res.json(newNote);
   });
+
+
+app.delete("/api/notes/:id", function(req, res) {
+    let deleteID = req.params.id;
+    
+    console.log(deleteID);
+
+    fs.readFile(path.join(__dirname, "/db/db.json"), "utf8", function(error, data) {
+        if (error) {
+            return console.log(error);
+        }
+
+        notes = JSON.parse(data);
+        let newNotes = [];
+
+        for(let i = 0; i < notes.length; i++) {
+            if(notes[i].id != deleteID) {
+                newNotes.push(notes[i]);
+            } else {
+                console.log("deleting note with id " + deleteID);
+            }
+        }
+
+        fs.writeFile(path.join(__dirname, "/db/db.json"), JSON.stringify(newNotes), function(err) {
+
+            if (err) {
+              return console.log(err);
+            }
+          
+            console.log("Success!");
+          
+        });
+
+    return res.json(newNotes);
+
+    });
+});
 
 
 app.get("*", function(req, res) {
