@@ -9,7 +9,7 @@ let fs = require("fs");
 let app = express();
 
 // use port 3000 unless there exists a preconfigured port
-let PORT = process.env.port || 3000;
+let PORT = process.env.PORT || 3000;
 
 // Sets up the Express app to handle data parsing
 app.use(express.urlencoded({ extended: true }));
