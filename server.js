@@ -22,7 +22,7 @@ let notes;
 let uniqueID = 1;
 
 
-// get routes
+// get the notes.html page when the /notes route is requested
 app.get("/notes", function(req, res) {
     res.sendFile(path.join(__dirname, "/public/notes.html"));
   });
@@ -45,37 +45,37 @@ app.get("/api/notes", function(req, res) {
 
 // add a new note to the data file
 app.post("/api/notes", function(req, res) {
-    // req.body hosts is equal to the JSON post sent from the user
+    // req.body is equal to the JSON post sent from the user
     // This works because of our body parsing middleware
   
     let newNote = req.body;
 
+    // read db.json file
     fs.readFile(path.join(__dirname, "/db/db.json"), "utf8", function(error, data) {
         if (error) {
             return console.log(error);
         }
 
+        // parse the data from a json object
         notes = JSON.parse(data);
 
+        // iterate through existing note in order to set uniqueID to be larger than any existing note ids
         for(let i = 0; i < notes.length; i++) {
-            let note1 = notes[i];
-            console.log(note1.id);
-            if(note1.id > uniqueID) {
-                uniqueID = note1.id + 1;
+            if(notes[i].id > uniqueID) {
+                uniqueID = notes[i].id + 1;
             }
         }
 
-
-
-        console.log("notes prior to adding new note: ");
-        console.log(notes);
-        console.log("newNote before adding ID: ");
-        console.log(newNote);
+        // console.log("notes prior to adding new note: ");
+        // console.log(notes);
+        // console.log("newNote before adding ID: ");
+        // console.log(newNote);
         newNote.id = uniqueID;
         uniqueID++;
         notes.push(newNote);
-        console.log(notes);
+        // console.log(notes);
 
+        // write db.json file with new note included
         fs.writeFile(path.join(__dirname, "/db/db.json"), JSON.stringify(notes), function(err) {
 
             if (err) {
@@ -86,15 +86,15 @@ app.post("/api/notes", function(req, res) {
           
           });
     });
+    
     res.json(newNote);
   });
 
-
+// DELETE route to delete a note with a specified id
 app.delete("/api/notes/:id", function(req, res) {
     let deleteID = req.params.id;
-    
-    console.log(deleteID);
 
+    // read the existing database file
     fs.readFile(path.join(__dirname, "/db/db.json"), "utf8", function(error, data) {
         if (error) {
             return console.log(error);
@@ -103,21 +103,21 @@ app.delete("/api/notes/:id", function(req, res) {
         notes = JSON.parse(data);
         let newNotes = [];
 
+        // iterate through the existing notes, and push them to the newNotes unless they match the id of the note to be deleted
         for(let i = 0; i < notes.length; i++) {
             if(notes[i].id != deleteID) {
                 newNotes.push(notes[i]);
-            } else {
-                console.log("deleting note with id " + deleteID);
             }
         }
 
+        // write newNotes to db.json file, overwriting previous file
         fs.writeFile(path.join(__dirname, "/db/db.json"), JSON.stringify(newNotes), function(err) {
 
             if (err) {
               return console.log(err);
             }
           
-            console.log("Success!");
+            console.log("Successfully wrote db.json");
           
         });
 
@@ -126,7 +126,7 @@ app.delete("/api/notes/:id", function(req, res) {
     });
 });
 
-
+// on all other GET routes, send index.html
 app.get("*", function(req, res) {
     res.sendFile(path.join(__dirname, "/public/index.html"));
 });
